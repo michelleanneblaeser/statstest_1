@@ -1,0 +1,27 @@
+---
+title: "Stats Test 1"
+output: html_notebook
+---
+
+Load relevant packages:
+```{r}
+library(pacman)
+p_load(tidyverse, haven, magrittr, readxl, labelled, psych, janitor, class, caret, vcd, e1071, readr, stringr, knitr, kableExtra, broom, boot, gmodels, glmnet, MASS, leaps, Metrics, ISLR, randomForest, tree, gbm)
+```
+
+Load relevant data:
+```{r}
+delinquent <- read_spss("../statstest_1/data/Cambridge_delinquency.sav")
+conviction <- read_spss("../statstest_1/data/conviction_data.sav")
+```
+Convert conviction data from long to wide:
+```{r}
+wide_conviction <- spread(data = conviction, key = agecat, value = convicted)
+
+```
+Combine conviction data with delinquency data:
+```{r}
+icpsr_seq_id_number <- 1:411
+delinquent$icpsr_seq_id_number <- icpsr_seq_id_number
+```
+
