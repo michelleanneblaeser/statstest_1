@@ -57,26 +57,55 @@ I am interested in what parent-child relationship variables predict criminality 
 
 The following factors are selected for consideration:
 
-Ages 8-9: Discipline of father or mother (v59, v60), discipline quality of father & mother (v 62 & v63), Interest in children by father (v90), maternal and paternal attitude (v99 & v 118), physical neglect of boy (v123), praise by parents (v124), rules of parents (v132), broken home before age 10 (v134), separations up to 5 from father or mother or parents (v139, v140 & v141), separations before 10 from father or mother or parents (v144, v 145 & v 146) , temporary separations up to age 5 from father or mother or parents (v148, v149, v150), temporary separations up to age 10 from father or mother or parents (v151, v152 & v 153), vigilence of parents (v159)
-Ages 10-11: Attitude of father combined or mother combined (v178 & v179), authoratarianism of parents combined (v180), maternal and paternal attitude (v227 & v248),  P. A. S. father and mother authoratarian (v249 & v250), P. A. S. mother underconcerned (v251), supervision by parents (v274)
+Ages 8-9: Discipline of father or mother (v59, v60), discipline quality of father & mother (v 62 & v63), Interest in children by father (v90), maternal and paternal attitude (v99 & v 118), physical neglect of boy (v123), praise by parents (v124), rules of parents (v132), broken home before age 10 (v134), separations up to 5 from father or mother or parents (v139, v140 & v141), separations before 10 from father or mother or parents (v144, v 145 & v 146) , temporary separations up to age 5 from father or mother or parents (v148, v149, v150), temporary separations up to age 10 from father or mother or parents (v151, v152 & v 153), vigilance of parents (v159)
+Ages 10-11: Attitude of father combined or mother combined (v178 & v179), authoritarianism of parents combined (v180), maternal and paternal attitude (v227 & v248),  P. A. S. father and mother authoritarian (v249 & v250), P. A. S. mother underconcerned (v251), supervision by parents (v274)
 Ages 12-13: Parental approval of boy (v416), broken home before 15 (v425)
 Ages 16-17: Who boy is living with (v495)
 Ages 18-19: Natural parents alive or dead (v626), Living circumstances (parent/foster or other; v627), living preferences (v628), agreement with mother and father (v629 & v630), relationships with parents combined (v791)
 Ages 21-22: Age left home (v814)
 All new variable names end with a record of the boys age at the time of that round of data collection. THus "8y" indicates that the data was collected dueing the "ages 8-9" round. Some variables (e.g.: supervision_parents_score) was reported during a different round (e.g.: "ages 10 - 11"), but is actually an amalgamation of scores collected during an earlier round (e.g.: "ages 8 - 9"). In these cases they are labelled to indicate the time of raw score collection (e.g."8y"), not the time that it was amalgamated and reported (e.g.: "10y"), as no new information was collected (it is just data wrangling by the researchers) .
 Only the variables collected before age 17 can be used as predictors of juvenile delinquency, and all variables can be used as predcitors of adult delinquency
+
+Next, we need to recode the variables so that they are amenable to analysis (see attached codebook for detailed recoding)
 ```{r}
 predictor_variables.dat <- dplyr::select(join_delinquent, 
                                          PID = icpsr_seq_id_number,
-                              discipline_father_8y = v59, discipline_mother_8y = v60, discipline_quality_father_8y = v62, discipline_quality_mother_8y = v63,           father_interest_8y = v90, maternal_attitude_8y = v99, paternal_attitude_8y = v118,              neglected_8y = v123, parent_praise_8y = v124, parent_rules_8y = v132, permanent_sep_parent_8y = v134, over1mo_sep_father_under5y = v139, over1mo_sep_mother_under5y = v140, over1mo_sep_parent_under5y = v141, over1mo_sep_father_under10y = v144, over1mo_sep_mother_under10y = v145, over1mo_sep_parent_under10y = v146, temp_sep_father_under5y = v148, temp_sep_mother_under5y = v149, temp_sep_parent_under5y = v150, temp_sep_father_under10y = v151, temp_sep_mother_under10y = v152, temp_sep_parent_under10y = v153, parent_vigilence_8y = v159,
+                              discipline_father_8y = v59, discipline_mother_8y = v60, discipline_quality_father_8y = v62, discipline_quality_mother_8y = v63,           father_interest_8y = v90, maternal_attitude_8y = v99, paternal_attitude_8y = v118,              neglected_8y = v123, parent_praise_8y = v124, parent_rules_8y = v132, permanent_sep_parent_8y = v134, over1mo_sep_father_under5y = v139, over1mo_sep_mother_under5y = v140, over1mo_sep_parent_under5y = v141, over1mo_sep_father_under10y = v144, over1mo_sep_mother_under10y = v145, over1mo_sep_parent_under10y = v146, temp_sep_father_under5y = v148, temp_sep_mother_under5y = v149, temp_sep_parent_under5y = v150, temp_sep_father_under10y = v151, temp_sep_mother_under10y = v152, temp_sep_parent_under10y = v153, parent_vigilance_8y = v159,
                              attitude_father_score_8y = v178, attitude_mother_score_8y = v179, pas_authoritarianism_parents_10y = v180, maternal_attitude_10y = v227, paternal_attitude_10y = v248, pas_authoritarianism_father_10y = v249, pas_authoritarianism_mother_10y = v250,pas_underconcerned_mother_10y = v251, supervision_parents_score_8y = v274,
                              parent_approval_12y = v416, permanent_sep_parent_12y = v425,
                              live_parents_home_16y = v495,
-                             parents_alive_18y = v626, live_parentsorfoster_home_16y = v625, want_live_parents_home_18y = v628, agreement_mother_18y = v629, agreement_father_18y = v630, harmony_parents_score_18y = v791,
+                             parents_alive_18y = v626, live_parentsorfoster_home_16y = v627, want_live_parents_home_18y = v628, agreement_mother_18y = v629, agreement_father_18y = v630, harmony_parents_score_18y = v791,
                              age_left_home_21y = v814)
-```
-Next, we need to recode the variables so that they are amenable to analysis (see attached codebook for detailed recoding)
-```{r}
 
+predictor_variables_recode.dat <- predictor_variables.dat
+predictor_variables_recode.dat <- apply(predictor_variables_recode.dat, 2, function(x) {x[x == 0] <- NA; x})
+predictor_variables_recode.dat$discipline_father_8y <- recode(predictor_variables_recode.dat$discipline_father_8y, "2=3; 3=2; 4=2; 5=3; 6=NA")
+predictor_variables_recode.dat$discipline_mother_8y <- recode(predictor_variables_recode.dat$discipline_mother_8y, "2=3; 3=2; 4=2; 5=3; 6=NA")
+predictor_variables_recode.dat$discipline_quality_father_8y <- recode(predictor_variables_recode.dat$discipline_quality_father_8y, "4=2; 5=NA") predictor_variables_recode.dat$discipline_quality_mother_8y <- recode(predictor_variables_recode.dat$discipline_quality_mother_8y, "4=2; 5=NA")
+predictor_variables_recode.dat$father_interest_8y <- recode(predictor_variables_recode.dat$father_interest_8y, "3=NA")
+predictor_variables_recode.dat$maternal_attitude_8y <- recode(predictor_variables_recode.dat$maternal_attitude_8y, "3=2; 4:6=3; 7=NA")
+predictor_variables_recode.dat$paternal_attitude_8y <- recode(predictor_variables_recode.dat$paternal_attitude_8y, "4=2; 5:6=NA")
+predictor_variables_recode.dat$permanent_sep_parent_8y <- recode(predictor_variables_recode.dat$permanent_sep_parent_8y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_father_under5y <- recode(predictor_variables_recode.dat$over1mo_sep_father_under5y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_mother_under5y <- recode(predictor_variables_recode.dat$over1mo_sep_mother_under5y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_parent_under5y <- recode(predictor_variables_recode.dat$over1mo_sep_parent_under5y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_father_under10y <- recode(predictor_variables_recode.dat$over1mo_sep_father_under10y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_mother_under10y <- recode(predictor_variables_recode.dat$over1mo_sep_mother_under10y, "3=2")
+predictor_variables_recode.dat$over1mo_sep_parent_under10y <- recode(predictor_variables_recode.dat$over1mo_sep_parent_under10y, "3=2")
+predictor_variables_recode.dat$temp_sep_father_under5y <- recode(predictor_variables_recode.dat$temp_sep_father_under5y, "3=2")
+predictor_variables_recode.dat$temp_sep_mother_under5y <- recode(predictor_variables_recode.dat$temp_sep_mother_under5y, "3=2")
+predictor_variables_recode.dat$temp_sep_parent_under5y <-recode(predictor_variables_recode.dat$temp_sep_parent_under5y, "3=2")
+predictor_variables_recode.dat$temp_sep_father_under10y <- recode(predictor_variables_recode.dat$temp_sep_father_under10y, "3=2")
+predictor_variables_recode.dat$temp_sep_mother_under10y <- recode(predictor_variables_recode.dat$temp_sep_mother_under10y, "3=2")
+predictor_variables_recode.dat$temp_sep_parent_under10y <- recode(predictor_variables_recode.dat$temp_sep_parent_under10y, "3=2")
+predictor_variables_recode.dat$maternal_attitude_10y <- recode(predictor_variables_recode.dat$maternal_attitude_10y, "3=2; 4:5=3; 6=NA")
+predictor_variables_recode.dat$paternal_attitude_10y <- recode(predictor_variables_recode.dat$paternal_attitude_10y, "4=2; 5:6=NA")
+predictor_variables_recode.dat$permanent_sep_parent_12y <- recode(predictor_variables_recode.dat$permanent_sep_parent_12y, "3=2")
+predictor_variables_recode.dat$live_parents_home_16y <- recode(predictor_variables_recode.dat$live_parents_home_16y, "3=2")
+predictor_variables_recode.dat$parents_alive_18y <- recode(predictor_variables_recode.dat$parents_alive_18y, "3=2; 4=3")
+predictor_variables_recode.dat$live_parentsorfoster_home_16y <- recode(predictor_variables_recode.dat$live_parentsorfoster_home_16y, "2:3=1; 4:6=2; 9=NA")
+
+= v627, want_live_parents_home_18y = v628, agreement_mother_18y = v629, agreement_father_18y = v630, harmony_parents_score_18y = v791,
+                             age_left_home_21y = v814
 ```
 
