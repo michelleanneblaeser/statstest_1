@@ -2,7 +2,7 @@
 title: "Stats Test 1"
 output: html_notebook
 ---
-
+Question 1:
 Load relevant packages:
 ```{r}
 library(pacman)
@@ -78,13 +78,13 @@ predictor_variables.dat <- dplyr::select(join_delinquent,
                              age_left_home_21y = v814)
 
 predictor_variables_recode.dat <- predictor_variables.dat
-predictor_variables_recode.dat <- apply(predictor_variables_recode.dat, 2, function(x) {x[x == 0] <- NA; x})
-predictor_variables_recode.dat$discipline_father_8y <- recode(predictor_variables_recode.dat$discipline_father_8y, "2=3; 3=2; 4=2; 5=3; 6=NA")
-predictor_variables_recode.dat$discipline_mother_8y <- recode(predictor_variables_recode.dat$discipline_mother_8y, "2=3; 3=2; 4=2; 5=3; 6=NA")
-predictor_variables_recode.dat$discipline_quality_father_8y <- recode(predictor_variables_recode.dat$discipline_quality_father_8y, "4=2; 5=NA") predictor_variables_recode.dat$discipline_quality_mother_8y <- recode(predictor_variables_recode.dat$discipline_quality_mother_8y, "4=2; 5=NA")
+predictor_variables_recode.dat$discipline_father_8y <-     recode(predictor_variables_recode.dat$discipline_father_8y, "2=3; 3=2; 4=2; 5=3")
+predictor_variables_recode.dat$discipline_mother_8y <- recode(predictor_variables_recode.dat$discipline_mother_8y, "2=3; 3=2; 4=2; 5=3")
+predictor_variables_recode.dat$discipline_quality_father_8y <- recode(predictor_variables_recode.dat$discipline_quality_father_8y, "4=2")
+predictor_variables_recode.dat$discipline_quality_mother_8y <- recode(predictor_variables_recode.dat$discipline_quality_mother_8y, "4=2")
 predictor_variables_recode.dat$father_interest_8y <- recode(predictor_variables_recode.dat$father_interest_8y, "3=NA")
-predictor_variables_recode.dat$maternal_attitude_8y <- recode(predictor_variables_recode.dat$maternal_attitude_8y, "3=2; 4:6=3; 7=NA")
-predictor_variables_recode.dat$paternal_attitude_8y <- recode(predictor_variables_recode.dat$paternal_attitude_8y, "4=2; 5:6=NA")
+predictor_variables_recode.dat$maternal_attitude_8y <- recode(predictor_variables_recode.dat$maternal_attitude_8y, "3=2; 4:6=3")
+predictor_variables_recode.dat$paternal_attitude_8y <- recode(predictor_variables_recode.dat$paternal_attitude_8y, "4=2")
 predictor_variables_recode.dat$permanent_sep_parent_8y <- recode(predictor_variables_recode.dat$permanent_sep_parent_8y, "3=2")
 predictor_variables_recode.dat$over1mo_sep_father_under5y <- recode(predictor_variables_recode.dat$over1mo_sep_father_under5y, "3=2")
 predictor_variables_recode.dat$over1mo_sep_mother_under5y <- recode(predictor_variables_recode.dat$over1mo_sep_mother_under5y, "3=2")
@@ -98,14 +98,56 @@ predictor_variables_recode.dat$temp_sep_parent_under5y <-recode(predictor_variab
 predictor_variables_recode.dat$temp_sep_father_under10y <- recode(predictor_variables_recode.dat$temp_sep_father_under10y, "3=2")
 predictor_variables_recode.dat$temp_sep_mother_under10y <- recode(predictor_variables_recode.dat$temp_sep_mother_under10y, "3=2")
 predictor_variables_recode.dat$temp_sep_parent_under10y <- recode(predictor_variables_recode.dat$temp_sep_parent_under10y, "3=2")
-predictor_variables_recode.dat$maternal_attitude_10y <- recode(predictor_variables_recode.dat$maternal_attitude_10y, "3=2; 4:5=3; 6=NA")
-predictor_variables_recode.dat$paternal_attitude_10y <- recode(predictor_variables_recode.dat$paternal_attitude_10y, "4=2; 5:6=NA")
+predictor_variables_recode.dat$maternal_attitude_10y <- recode(predictor_variables_recode.dat$maternal_attitude_10y, "3=2; 4:5=3")
+predictor_variables_recode.dat$paternal_attitude_10y <- recode(predictor_variables_recode.dat$paternal_attitude_10y, "4=2")
 predictor_variables_recode.dat$permanent_sep_parent_12y <- recode(predictor_variables_recode.dat$permanent_sep_parent_12y, "3=2")
 predictor_variables_recode.dat$live_parents_home_16y <- recode(predictor_variables_recode.dat$live_parents_home_16y, "3=2")
 predictor_variables_recode.dat$parents_alive_18y <- recode(predictor_variables_recode.dat$parents_alive_18y, "3=2; 4=3")
-predictor_variables_recode.dat$live_parentsorfoster_home_16y <- recode(predictor_variables_recode.dat$live_parentsorfoster_home_16y, "2:3=1; 4:6=2; 9=NA")
-
-= v627, want_live_parents_home_18y = v628, agreement_mother_18y = v629, agreement_father_18y = v630, harmony_parents_score_18y = v791,
-                             age_left_home_21y = v814
+predictor_variables_recode.dat$live_parentsorfoster_home_16y <- recode(predictor_variables_recode.dat$live_parentsorfoster_home_16y, "2:3=1; 4:6=2")
+predictor_variables_recode.dat$age_left_home_21y <- recode(predictor_variables_recode.dat$age_left_home_21y, "000=NA; 106=1; 109=2; 808=3; 999=4")
+predictor_variables_recode.dat <- apply(predictor_variables_recode.dat, 2, function(x) {x[x == 0] <- NA; x})
+predictor_variables_recode.dat <- apply(predictor_variables_recode.dat, 2, function(x) {x[x == 5 | x == 6 | x==7 | x==8 | x == 9] <- NA; x})
 ```
+Create data frames for analysing juvenile delinquency and adult delinquency
+```{r}
+adult_delinq.dat <- full_join(as.data.frame(criminality2), as.data.frame(predictor_variables_recode.dat), by = "PID")
+juv_delinq.dat <- dplyr::select(adult_delinq.dat, -c(live_parents_home_16y, parents_alive_18y, live_parentsorfoster_home_16y, want_live_parents_home_18y, agreement_mother_18y, agreement_father_18y, harmony_parents_score_18y, age_left_home_21y))
+```
+Question 2:
+Descriptive stats for variables
+```{r}
+describe(adult_delinq.dat)
+```
+The min and max values revealed an error in the recode, which has since been fixed. All values now fall within expected codes. Most variables contain some missing data, however all but one variable has at least 232 viable cases. One variable (age_left_home_21y) only had 84 viable cases - on closer inspection, this was a continuous variable that was incorrectly coded as a ordinal variable. It has since been removed (see below)
+```{r}
+adult_delinq.dat <- dplyr::select(adult_delinq.dat, -age_left_home_21y)
+```
+Look at the possible relationships between PVs and DVS. For this step we'll need to subset the data frame, as we have 45 variables to pair
+```{r}
+adult_pt1.dat <- dplyr::select(adult_delinq.dat, njuv_convict, nadult_convict, nconvict,
+                               discipline_father_8y, discipline_mother_8y, discipline_quality_father_8y, discipline_quality_mother_8y, father_interest_8y, maternal_attitude_8y, paternal_attitude_8y, neglected_8y, parent_praise_8y, parent_rules_8y)
+
+adult_pt2.dat <- dplyr::select(adult_delinq.dat, njuv_convict, nadult_convict, nconvict,
+                               permanent_sep_parent_8y, over1mo_sep_father_under5y, over1mo_sep_mother_under5y, over1mo_sep_parent_under5y, over1mo_sep_father_under10y, over1mo_sep_mother_under10y, over1mo_sep_parent_under10y, temp_sep_father_under5y, temp_sep_mother_under5y, temp_sep_parent_under5y, temp_sep_father_under10y, temp_sep_mother_under10y, temp_sep_parent_under10y)
+                               
+adult_pt3.dat <- dplyr::select(adult_delinq.dat, njuv_convict, nadult_convict, nconvict,
+                               parent_vigilance_8y, attitude_father_score_8y, attitude_mother_score_8y, pas_authoritarianism_parents_10y, maternal_attitude_10y, paternal_attitude_10y, pas_authoritarianism_father_10y, pas_authoritarianism_mother_10y, pas_underconcerned_mother_10y, supervision_parents_score_8y, parent_approval_12y, permanent_sep_parent_12y)
+
+adult_pt4.dat <- dplyr::select(adult_delinq.dat, nadult_convict, nconvict,
+                                 live_parents_home_16y, parents_alive_18y, live_parentsorfoster_home_16y, want_live_parents_home_18y, agreement_mother_18y, agreement_father_18y, harmony_parents_score_18y)
+
+pairs.panels(adult_pt1.dat, method = "spearman")
+pairs.panels(adult_pt2.dat, method = "spearman")
+pairs.panels(adult_pt3.dat, method = "spearman")
+pairs.panels(adult_pt4.dat, method = "spearman")
+```
+Subset 1: All of the predictors in the first subset have weak relationships (rs < .40) with number of juvenile convictions, number of adult convictions, and overall number of convictions (first 3 variables = DVS). Of these weak predictions, the best predictor of all 3 potential DVs is if the boy was categorised as neglected (recorded during the interview at ages 8-9)
+Subset 2: All of the predictors in the second subset have weak relationships (rs < .40) with the potential DVs
+Subset 3: All of the predictors in the third subset have weak relationships (rs < .40) with the potential DVS. Of these weak predictions, the best predictors are level of parent vigilence (recorded during the interview at ages 8-9), parents supervision score (ages 8-9), and parental approval (recorded during the interview at ages 12-13). The latter 2 are more predictive of adult delinquency and overall delinquency than juvenile delinquency.
+Subset 4: All these variables were collected from age 17 onwards, thus they are nor correlated with juvenile delinquency numbers. Again, they are all weak predictors, although harmony between the boy and his parents at ages 18-19 is the strongest predictor.
+
+This pattern of correlation is expected when looking at relational predictor variables. Often it is not one isolated aspect of the parent-child relationship that exclusively determines the outcome (degree of criminality of the child), but an array of factors working together - each partially contributing to a relationship that either increses or decreases their liklihood of becoming a criminal
+--------------------------------------------------------------------------------------------
+Question 3:
+The sheer number of potential predictor variables is best handled with an approach that can identify the most important variables for a model. For this reason I will run a 
 
