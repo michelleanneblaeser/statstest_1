@@ -6,12 +6,11 @@ Question 1:
 Load relevant packages:
 ```{r}
 library(pacman)
-p_load(tidyverse, haven, magrittr, readxl, labelled, psych, janitor, class, caret, vcd, e1071, readr, stringr, knitr, kableExtra, broom, boot, gmodels, glmnet, MASS, leaps, Metrics, ISLR, randomForest, tree, gbm, car)
+p_load(tidyverse, haven, magrittr, readxl, labelled, psych, janitor, class, caret, vcd, e1071, readr, stringr, knitr, kableExtra, broom, boot, gmodels, glmnet, MASS, leaps, Metrics, ISLR, randomForest, tree, gbm, car, merTools)
 ```
-
 Load relevant data
 Convert conviction data from long to wide
-Combine conviction data with delinquency data:
+Combine conviction data with delinquency data
 ```{r}
 delinquent <- read_spss("../statstest_1/data/Cambridge_delinquency.sav")
 conviction <- read_spss("../statstest_1/data/conviction_data.sav")
@@ -24,7 +23,7 @@ join_delinquent <- full_join(delinquent, wide_conviction, by = "icpsr_seq_id_num
 ```
 Create new data frame with potential outcome variables:
 Select pariticipant ID number, "Number of juvenile convictions", "Number of adult convictions", and "Number of overall convictions" to begin the new data 
-Rename ID number (PID), number of juvenile convictions (njuv_convict), number of adult convictions (nadult_convict), and number of overall convictions.
+Rename ID number (PID), number of juvenile convictions (njuv_convict), number of adult convictions (nadult_convict), and number of overall convictions (nconvict).
 Recode variables so that they're on comparable scales:
 0 = no convictions
 1 = 1 conviction
@@ -48,12 +47,12 @@ pairs.panels(criminality2, method = "spearman")
 ```
 We see that the mean, median, minimum, and maximum values of juvenile and adult conviction decrease by eaxtly one unit from criminality1 to criminality2, the standard deviations, number of participants, and range remain constant, as do estimates of skew, kurtosis, and standard error - This confirms that the recode was executed according to plan. Changes occur in the third variable (number of overall convictions) between data sets, because some of the levels were collapsed (to mirror the levels in the first two variables).
 
-From the correlation matrix we see that there is only a moderate correlation between number of juvenile and adult convictions (rs = .54) indicating that not all convicted juveniles go on to adult conviction. Number of juvenile convictions predict number of overall convictions less strongly than number of adult convictions does (rs = .77 and rs = .90 respectively), indicating that the biggest influence on overall conviction is conviction in adulthood. Thus we conclude that not all juvenile convicts continue with criminality into adulthood (at least to the same degree), and the subsample that have a higher number of convictions in adulthood are slightly more representative of those who have higher level of convictions overall (criminality overall spikes in adulthood).
+From the correlation matrix we see that there is only a moderate correlation between number of juvenile and adult convictions (rs = .54) indicating that not all convicted juveniles go on to adult conviction, and not all adult convicts were initially juvenile convicts. Number of juvenile convictions predict number of overall convictions less strongly than number of adult convictions does (rs = .77 and rs = .90 respectively), indicating that the biggest influence on overall conviction is conviction in adulthood. Thus we conclude that not all juvenile convicts continue with criminality into adulthood (at least to the same degree), and the subsample that have a higher number of convictions in adulthood are slightly more representative of those who have higher level of convictions overall (criminality overall spikes in adulthood).
 Thus is is useful to consider 2 models - 1) predictors that lead to juvenile criminality (and which go on to predict adult criminality to a moderate degree), and 2) predictors that lead to criminality in adulthood (which predicts overall criminality to a high degree).
 -----------------------------
 
 Next, we consider predictor variables for our primary outcomes (juvenile and adult criminality)
-I am interested in what parent-child relationship variables predict criminality in the boys. There is extensive literature on the realtionship between child/adult outcomes and relational factors such as attachment style, early separations, and discipline. It is of interest which parent-child relational variables predict criminality as a juvenile, and as an adult, respectively. For the purposes of this model I will only consider primary relational processes (e.g.: separations, discipline), and not secondary relational processes (e.g.: unhappiness of father/mother, which may spill over into their relationship with their son). Furthermore, I will only consider dichotemous, ordinal or continuous variables (or those that can be recoded as such)
+I am interested in what parent-child relationship variables predict criminality in the boys. There is extensive literature on the realtionship between child/adult outcomes and relational factors such as attachment style, early separations, and discipline. It is of interest which (if any) parent-child relational variables predict criminality as a juvenile, and as an adult, respectively. For the purposes of this model I will only consider primary relational processes (e.g.: separations, discipline), and not secondary relational processes (e.g.: unhappiness of father/mother, which may spill over into their relationship with their son). Furthermore, I will only consider dichotemous, ordinal or continuous variables (or those that can be recoded as such)
 
 The following factors are selected for consideration:
 
@@ -63,7 +62,7 @@ Ages 12-13: Parental approval of boy (v416), broken home before 15 (v425)
 Ages 16-17: Who boy is living with (v495)
 Ages 18-19: Natural parents alive or dead (v626), Living circumstances (parent/foster or other; v627), living preferences (v628), agreement with mother and father (v629 & v630), relationships with parents combined (v791)
 Ages 21-22: Age left home (v814)
-All new variable names end with a record of the boys age at the time of that round of data collection. THus "8y" indicates that the data was collected dueing the "ages 8-9" round. Some variables (e.g.: supervision_parents_score) was reported during a different round (e.g.: "ages 10 - 11"), but is actually an amalgamation of scores collected during an earlier round (e.g.: "ages 8 - 9"). In these cases they are labelled to indicate the time of raw score collection (e.g."8y"), not the time that it was amalgamated and reported (e.g.: "10y"), as no new information was collected (it is just data wrangling by the researchers) .
+All new variable names end with a record of the boys age at the time of that round of data collection. Thus "8y" indicates that the data was collected dueing the "ages 8-9" round. Some variables (e.g.: supervision_parents_score) was reported during a different round (e.g.: "ages 10 - 11"), but is actually an amalgamation of scores collected during an earlier round (e.g.: "ages 8 - 9"). In these cases they are labelled to indicate the time of raw score collection (e.g."8y"), not the time that it was amalgamated and reported (e.g.: "10y"), as no new information was collected (it is just data wrangling by the researchers) .
 Only the variables collected before age 17 can be used as predictors of juvenile delinquency, and all variables can be used as predcitors of adult delinquency
 
 Next, we need to recode the variables so that they are amenable to analysis (see attached codebook for detailed recoding)
@@ -144,10 +143,156 @@ pairs.panels(adult_pt4.dat, method = "spearman")
 Subset 1: All of the predictors in the first subset have weak relationships (rs < .40) with number of juvenile convictions, number of adult convictions, and overall number of convictions (first 3 variables = DVS). Of these weak predictions, the best predictor of all 3 potential DVs is if the boy was categorised as neglected (recorded during the interview at ages 8-9)
 Subset 2: All of the predictors in the second subset have weak relationships (rs < .40) with the potential DVs
 Subset 3: All of the predictors in the third subset have weak relationships (rs < .40) with the potential DVS. Of these weak predictions, the best predictors are level of parent vigilence (recorded during the interview at ages 8-9), parents supervision score (ages 8-9), and parental approval (recorded during the interview at ages 12-13). The latter 2 are more predictive of adult delinquency and overall delinquency than juvenile delinquency.
-Subset 4: All these variables were collected from age 17 onwards, thus they are nor correlated with juvenile delinquency numbers. Again, they are all weak predictors, although harmony between the boy and his parents at ages 18-19 is the strongest predictor.
+Subset 4: All these variables were collected from age 17 onwards, thus they are not correlated with juvenile delinquency numbers. Again, they are all weak predictors of adult and overall delinquency, although harmony between the boy and his parents at ages 18-19 is the strongest predictor.
 
-This pattern of correlation is expected when looking at relational predictor variables. Often it is not one isolated aspect of the parent-child relationship that exclusively determines the outcome (degree of criminality of the child), but an array of factors working together - each partially contributing to a relationship that either increses or decreases their liklihood of becoming a criminal
+This pattern of correlation is expected when looking at relational predictor variables. Often it is not one isolated aspect of the parent-child relationship that exclusively determines the outcome (e.g.: degree of criminality of the child), but an array of factors working together - each partially contributing to a relationship that either increses or decreases their liklihood of an outcome (e.g.: becoming a criminal)
 --------------------------------------------------------------------------------------------
 Question 3:
-The sheer number of potential predictor variables is best handled with an approach that can identify the most important variables for a model. For this reason I will run a 
+The sheer number of potential predictor variables is best handled with an approach that can identify the most important variables for a model. For this reason I will run a gradient boosted tree model
 
+Juvenile model:
+First, we set the seed and create training and test sets (for the first model - predictors of juvenile delinquency). In the first attempt we see that there is a problem with the attributes of our potential predictor variables. We convert these all to factors and try again. 
+```{r}
+juv_delinq.dat$njuv_convict <- as.factor(juv_delinq.dat$njuv_convict)
+juv_delinq.dat$nadult_convict <- as.factor(juv_delinq.dat$nadult_convict)
+juv_delinq.dat$nconvict <- as.factor(juv_delinq.dat$nconvict)
+
+set.seed(1)
+train_juv_delinq.dat <- sample_frac(juv_delinq.dat, 0.75)
+test_juv_delinq.dat <- setdiff(juv_delinq.dat, train_juv_delinq.dat)
+```
+Next, we run the boosted model. In our first attempt we see that boosted tree models don't allow for missing data. Thus we recode all NA values to 0, and re-run the training-test split and the model
+```{r}
+juv_delinq.dat0 <- juv_delinq.dat
+juv_delinq.dat0 <- apply(juv_delinq.dat0, 2, function(x) {x[is.na(x)] <- 0; x})
+juv_delinq.dat0 <- as.data.frame(juv_delinq.dat0)
+
+set.seed(1)
+train_juv_delinq.dat0 <- sample_frac(juv_delinq.dat0, 0.75)
+test_juv_delinq.dat0 <- setdiff(juv_delinq.dat0, train_juv_delinq.dat0)
+
+ 
+  
+juv.boost0 = gbm(njuv_convict ~ . - nadult_convict - nconvict - PID, data = train_juv_delinq.dat0, n.trees = 5000, interaction.depth = 1, shrinkage = 0.01)
+summary(juv.boost0)
+```
+Next, we test to see which complexity parameters will be optimal for our model (the above model was run using trial complexity parameters)
+```{r}
+grid = expand.grid(.n.trees=seq(100,500, by=200), .interaction.depth=seq(1,4, by=1), .shrinkage=c(.001,.01,.1), .n.minobsinnode=10)
+
+control = trainControl(method="CV", number=10)
+
+gbm.juv_delinq0.train = train(njuv_convict~.- nadult_convict - nconvict - PID, data=train_juv_delinq.dat0, method="gbm",
+ trControl=control, tuneGrid=grid)
+
+#gbm.juv_delinq0.train
+```
+The results of train test: Tuning parameter 'n.minobsinnode' was held constant at a value of 10
+Accuracy was used to select the optimal model using the largest value.
+The final values used for the model were n.trees = 300, interaction.depth =
+ 1, shrinkage = 0.01 and n.minobsinnode = 10.
+ 
+Next, we rerun the gradient boosted model with the optimal complexity parameters:
+
+```{r}
+
+juv.boost1 = gbm(njuv_convict ~. - nadult_convict - nconvict - PID, data = train_juv_delinq.dat0, distribution="multinomial",
+ n.trees=300, interaction.depth=1, shrinkage=0.01)
+summary(juv.boost1)
+
+juv.boost1.pred = predict(juv.boost1, newdata=test_juv_delinq.dat0, type="response",
+ n.trees=300)
+
+juv.boost1.test <- colnames(juv.boost1.pred)[base::apply(juv.boost1.pred, 1, base::which.max)]
+
+confusionMatrix(as.factor(as.numeric(juv.boost1.test)), as.factor(test_juv_delinq.dat0$njuv_convict))
+```
+We see in the importance table above that the most important factors in determining juvenile delinquency are: quality of discipline by mother (recorded at ages 8-9), if the boy was neglected (recoreded: ages 8-9), the composite mother attitude score (consisting of maternal attitude, discipline quality of mother, and discipline of mother; recorded: ages 8-9), the composite father attitude score (paternal variant of mother attitude score; recorded ages 8-9), the interest of the father in the boy (recorded: ages 8-9), and parent approval of the boy (recorded: ages 12-13). Thus the discipline type and quality provided by each parent, along with the parents' interest in, approval of and attitude towards the child during their earliest years (under 10years old) is most important in determining juvenile delinquency. If the child is neglected, their parents are likely to score poorly on all the above measures. Thus early neglect functions here as an indicator of the other important variables - thus neglect (present) is very important in predicting juvenile criminality.
+
+Next we need to assess the value of the model. We see that the model is 82% accurate. This looks fantastic until we look at the confusion matrix - the model predicts that no-one is a criminal, and it gets this right 82% of the time. Sensitivity and specificity values highlight this problem - this model has a sensitivity of 1.00 for identifying non-criminals, but a sensitivity of 0.00 for each of the 3 classes of juvenile criminals (1, 2-3, or 4 or more convictions, respectively)
+--------------------------------------------------------
+Adult model
+We abandon the gradient boosted juvenile model and attempt a gradient boosted model for adult criminality
+In our first gbm we see that boosted tree models don't allow for missing data, thus we recode all NA values to 0. Then we set the seed and create training and test sets (for the second model - predictors of adult delinquency). 
+```{r}
+adult_delinq.dat$njuv_convict <- as.factor(adult_delinq.dat$njuv_convict)
+adult_delinq.dat$nadult_convict <- as.factor(adult_delinq.dat$nadult_convict)
+adult_delinq.dat$nconvict <- as.factor(adult_delinq.dat$nconvict)
+
+adult_delinq.dat0 <- adult_delinq.dat
+adult_delinq.dat0 <- apply(adult_delinq.dat0, 2, function(x) {x[is.na(x)] <- 0; x})
+adult_delinq.dat0 <- as.data.frame(adult_delinq.dat0)
+
+set.seed(1)
+train_adult_delinq.dat0 <- sample_frac(adult_delinq.dat0, 0.75)
+test_adult_delinq.dat0 <- setdiff(adult_delinq.dat0, train_adult_delinq.dat0)
+```
+Next, we test to see which complexity parameters will be optimal for our model 
+```{r}
+grid = expand.grid(.n.trees=seq(100,500, by=200), .interaction.depth=seq(1,4, by=1), .shrinkage=c(.001,.01,.1), .n.minobsinnode=10)
+
+control = trainControl(method="CV", number=10)
+
+gbm.adult_delinq0.train = train(nadult_convict~.- njuv_convict - nconvict - PID, data=train_adult_delinq.dat0, method="gbm",
+ trControl=control, tuneGrid=grid)
+
+#gbm.juv_delinq0.train
+```
+```{r}
+gbm.adult_delinq0.train
+```
+The results of train test: Tuning parameter 'n.minobsinnode' was held constant at a value of 10
+Accuracy was used to select the optimal model using the largest value.
+The final values used for the model were n.trees = 100, interaction.depth =
+ 1, shrinkage = 0.001 and n.minobsinnode = 10.
+ 
+Next, we rerun the gradient boosted model with the optimal complexity parameters:
+
+```{r}
+
+adult.boost1 = gbm(nadult_convict ~. - njuv_convict - nconvict - PID, data = train_adult_delinq.dat0, distribution="multinomial",
+ n.trees=100, interaction.depth=1, shrinkage=0.001)
+summary(adult.boost1)
+
+adult.boost1.pred = predict(adult.boost1, newdata=test_adult_delinq.dat0, type="response",
+ n.trees=100)
+
+adult.boost1.test <- colnames(adult.boost1.pred)[base::apply(adult.boost1.pred, 1, base::which.max)]
+
+confusionMatrix(as.factor(as.numeric(adult.boost1.test)), as.factor(test_adult_delinq.dat0$nadult_convict))
+```
+We skip ahead to the confusion matrix and see that we have the same problem here - the model predicts that everyone will not be a criminal.
+----------------------------------------------------------------------------------------
+We now consider alternative models
+1. LDA
+2. Random Forests
+
+1. We run an LDA to predict juvenile delinquency
+```{r}
+lda.juv_delinq1 <- lda(njuv_convict ~. - nadult_convict - nconvict - PID, data = train_juv_delinq.dat0)
+```
+We see here that we have a problem of colliearity among the variables (this makes sense, as some variables are composite scores/subsets of other variables).
+
+2. We run a random forests model to predict juvenile delinquency
+```{r}
+rf.juv_delinq1 <- randomForest(njuv_convict ~. - nadult_convict - nconvict - PID, data = train_juv_delinq.dat0)
+print(rf.juv_delinq1)
+```
+THe estimated error rate is 20.51% - this doesn't look bad, but we can improve and analyse the model further.
+
+Next, we determine which number of trees will lead to the lowest error rate
+```{r}
+which.min(rf.juv_delinq1$err.rate[,1])
+```
+We see that the lowest error rate is with 262 trees. We use the new tree model with ntrees = 262 to predict the test data set. After that we create a confusion matrix to check model accuracy
+```{r}
+rf.juv_delinq2 = randomForest(njuv_convict ~. - nadult_convict - nconvict - PID, data = train_juv_delinq.dat0, ntree=262)
+print(rf.juv_delinq2)
+
+rf.juv_delinq2.pred = predict(rf.juv_delinq2, newdata=test_juv_delinq.dat0, type="response")
+confusionMatrix(data = rf.juv_delinq2.pred, reference = test_juv_delinq.dat0$njuv_convict)
+```
+We see again that the model predicts that no-one will be criminal, and is now only right 80% of the time (compared to gbm 82% accuracy rate). We can hypothesise that we will have similar results with the adult random forests model.
+------------------------------------------------------------------------------------------
+
+From these attempts we conclude that criminality (and degree of criminality) is not determined by parent-child relational variables (limited to the variables explored above)
