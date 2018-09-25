@@ -185,7 +185,7 @@ control = trainControl(method="CV", number=10)
 gbm.juv_delinq0.train = train(njuv_convict~.- nadult_convict - nconvict - PID, data=train_juv_delinq.dat0, method="gbm",
  trControl=control, tuneGrid=grid)
 
-#gbm.juv_delinq0.train
+gbm.juv_delinq0.train
 ```
 The results of train test: Tuning parameter 'n.minobsinnode' was held constant at a value of 10
 Accuracy was used to select the optimal model using the largest value.
@@ -296,3 +296,39 @@ We see again that the model predicts that no-one will be criminal, and is now on
 ------------------------------------------------------------------------------------------
 
 From these attempts we conclude that criminality (and degree of criminality) is not determined by parent-child relational variables (limited to the variables explored above)
+
+For one last attempt, we can make number of convictions a binary variable and conducting a logistic regression.
+Recode variables as below:
+0 = no convictions
+1 = any number of convictions
+```{r}
+juv_delinq_binary.dat0 <- juv_delinq.dat0
+juv_delinq_binary.dat0$njuv_convict <- recode(juv_delinq_binary.dat0$njuv_convict, "1=0; 2:4=1")
+juv_delinq_binary.dat0$nadult_convict <- recode(juv_delinq_binary.dat0$nadult_convict, "1=0; 2:4=1")
+juv_delinq_binary.dat0$nconvict <- recode(juv_delinq_binary.dat0$nconvict, "1=0; 2:4=1")
+```
+Check the outcome variable
+```{r}
+table(juv_delinq_binary.dat0$njuv_convict)
+
+juv_binary_outcome <- dplyr::select(juv_delinq_binary.dat0, njuv_convict, nadult_convict, nconvict)
+juv_binary_outcome <- as.data.frame(juv_binary_outcome)
+pairs.panels(juv_binary_outcome, method = "spearman")
+```
+We see that 379 juveniles were not convicted, and 37 juveniles were convicted (1 or more times). Juvenile convictions still correlate moderately with adult convictions and convictions overall. Adult criminality correlates strongly with criminality overall.
+
+Next we set a seed, create test and training sets, and run a logistic regression to determine which parent-child relational variables are predictive of criminality (in a binary distinction)
+```{r}
+set.seed(1)
+train_juv_delinq_binary.dat0 <- sample_frac(juv_delinq_binary.dat0, 0.75)
+test_juv_delinq_binary.dat0 <- setdiff(juv_delinq_binary.dat0, train_juv_delinq_binary.dat0)
+
+glm.juv_binary <- glm(njuv_convict ~. - nadult_convict - nconvict - PID, family = "binomial", data = train_juv_delinq_binary.dat0)
+summary(glm.juv_binary)
+```
+The error message suggests that the predictor variables are not linear-independent, or one of the PVs correlates perfectly with the DV.
+
+We know from the initial pairs panel that none of the predictor variables correlate completely with the  outcome variable. And based on the diagnosis of multicollinearity from the attempted LDA, we conclude that a logistic regression is prohibited due to the degree of collinearity. 
+
+Thus we conclude that we cannot determine criminality from parent-child relational variables
+
